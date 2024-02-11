@@ -40,7 +40,12 @@ def set_ini(index1, val1 ):
     with open('FILE.INI', 'w') as configfile:    # save
             config.write(configfile)  
     read_ini()
-  
+    # Re-register validation for dnsp Entry widget
+    dnsp.configure(validate="key", validatecommand=vcmd)
+
+    # Re-register validation for dnss Entry widget
+    dnss.configure(validate="key", validatecommand=vcmd)
+
 
 
 
@@ -74,6 +79,12 @@ def read_ini():
     except Exception as e:
         print("Error:", e)
     s = startupp  + 1
+    # Re-register validation for dnsp Entry widget
+    dnsp.configure(validate="key", validatecommand=vcmd)
+
+    # Re-register validation for dnss Entry widget
+    dnss.configure(validate="key", validatecommand=vcmd)
+
     return last_dns
     
 def on_save():
@@ -108,7 +119,12 @@ def on_save():
         CTkMessagebox(message="your input is invalid.",
                   icon="warning", option_1="ok")
         
-        
+    # Re-register validation for dnsp Entry widget
+    dnsp.configure(validate="key", validatecommand=vcmd)
+
+    # Re-register validation for dnss Entry widget
+    dnss.configure(validate="key", validatecommand=vcmd)
+    
 
 
 
@@ -136,7 +152,11 @@ def on_delete():
     read_ini()
     dnsptxt.set("")
     dnsstxt.set("")
-    
+    # Re-register validation for dnsp Entry widget
+    dnsp.configure(validate="key", validatecommand=vcmd)
+
+    # Re-register validation for dnss Entry widget
+    dnss.configure(validate="key", validatecommand=vcmd)
 
 def on_set():
     try:
@@ -175,7 +195,12 @@ def on_set():
     except Exception as e:
         CTkMessagebox(message=e,
                     icon="warning", option_1="ok")
-        
+    # Re-register validation for dnsp Entry widget
+    dnsp.configure(validate="key", validatecommand=vcmd)
+
+    # Re-register validation for dnss Entry widget
+    dnss.configure(validate="key", validatecommand=vcmd)
+    
     
 def on_select(*args):
     dns_list = combobox.get().split()
@@ -186,14 +211,19 @@ def on_select(*args):
         if  dns_list:
             dnsptxt.set(dns_list[0])
             dnsstxt.set(dns_list[1])
-    
+    # Re-register validation for dnsp Entry widget
+    dnsp.configure(validate="key", validatecommand=vcmd)
+
+    # Re-register validation for dnss Entry widget
+    dnss.configure(validate="key", validatecommand=vcmd)
+
     
 
     
 
 def Only_Integer(S):
     
-    if S.isdigit() or (S == '.' and '.' not in S):
+    if S.isdigit() or (S == '.' ):
         return True
     return False
 
