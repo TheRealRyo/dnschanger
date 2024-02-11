@@ -22,6 +22,10 @@ app=ctk.CTk()
 app.geometry("400x400")
 app.title("version 0.1")
 
+def use_regex(input_text):
+    pattern = r"\b(?:(?:2(?:[0-4][0-9]|5[0-5])|[0-1]?[0-9]?[0-9])\.){3}(?:(?:2([0-4][0-9]|5[0-5])|[0-1]?[0-9]?[0-9]))\b"
+    return re.search(pattern, input_text)
+
 
 def set_ini(index1, val1 ):
     config = configparser.ConfigParser()
@@ -91,21 +95,44 @@ def on_save():
     dns1 = dnsptxt.get()
     dns2 = dnsstxt.get()
 
-    if (len(dns1) >= 7) and (len(dns2) == '' or len(dns2) >= 7):
-         
+
+
+    if_match1 = use_regex(dns1)
+    if_match2 = use_regex(dns2)
+
+
+
+    
+
+    if if_match1:
+        if dns2 == "" or if_match2:
+
+            
+                
 
             config = configparser.ConfigParser()
             config.read('FILE.INI')
-            dns_to_save = dnsptxt.get() + " " + dnsstxt.get()
-            dns_list = config.get('DNS_LIST', 'list')
+            if not dns2 == '':
+                dns_to_save = dns1 + " " + dns2
+                dns_list = config.get('DNS_LIST', 'list')
+            else:
+                dns_to_save = dns1
+                dns_list = config.get('DNS_LIST', 'list')
             for machine, query in zip(dns_list.split(','), config['DNS']):
-                if dns_to_save == config.get('DNS', query):
+                if_save = config.get('DNS', query)
+                if dns_to_save == if_save:
+                    dnsp.configure(validate="key", validatecommand=vcmd)
+
+                    # Re-register validation for dnss Entry widget
+                    dnss.configure(validate="key", validatecommand=vcmd)
+                    CTkMessagebox(message="your input is duplicate.",
+                        icon="warning", option_1="ok")  
+                    
                     return
 
 
 
             if not (dnsstxt.get() == "" and dnsptxt.get() == ""):
-
                 set_ini(len(saved_dns)+1 , dnsptxt.get() + " " + dnsstxt.get() )
                 dd = read_ini()
                 config = configparser.ConfigParser()
@@ -115,9 +142,11 @@ def on_save():
                 for machine, query in zip(dns_list.split(','), config['DNS']):
                     if dd == config.get('DNS', query):
                         combobox.set(config.get('DNS', query))
-    else:
+            
+                
+    else:  
         CTkMessagebox(message="your input is invalid.",
-                  icon="warning", option_1="ok")
+                        icon="warning", option_1="ok")          
         
     # Re-register validation for dnsp Entry widget
     dnsp.configure(validate="key", validatecommand=vcmd)
@@ -208,9 +237,14 @@ def on_select(*args):
         
 
         
-        if  dns_list:
+        if  len(dns_list) == 2:
             dnsptxt.set(dns_list[0])
             dnsstxt.set(dns_list[1])
+        elif len(dns_list) == 1:
+            dnsptxt.set(dns_list[0])
+        else:
+            return
+
     # Re-register validation for dnsp Entry widget
     dnsp.configure(validate="key", validatecommand=vcmd)
 
@@ -222,7 +256,8 @@ def on_select(*args):
     
 
 def Only_Integer(S):
-    
+    if S == combobox.get():
+        return True
     if S.isdigit() or (S == '.' ):
         return True
     return False
