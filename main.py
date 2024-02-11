@@ -12,6 +12,10 @@ import wmi
 
 
 global startupp
+
+global BBB
+BBB = 0
+
 startupp = 0
 
 ctk.set_appearance_mode("dark")
@@ -21,7 +25,7 @@ ctk.set_default_color_theme("green")
 app=ctk.CTk()
 
 app.geometry("400x400")
-app.title("version 0.1")
+app.title("version 1.1.0")
 
 def use_regex(input_text):
     pattern = r"\b(?:(?:2(?:[0-4][0-9]|5[0-5])|[0-1]?[0-9]?[0-9])\.){3}(?:(?:2([0-4][0-9]|5[0-5])|[0-1]?[0-9]?[0-9]))\b"
@@ -126,7 +130,7 @@ def on_save():
 
                     # Re-register validation for dnss Entry widget
                     dnss.configure(validate="key", validatecommand=vcmd)
-                    CTkMessagebox(message="your input is duplicate.",
+                    CTkMessagebox(title="Warning!" ,message="your input is duplicate.",
                         icon="warning", option_1="ok")  
                     
                     return
@@ -146,7 +150,7 @@ def on_save():
             
                 
     else:  
-        CTkMessagebox(message="your input is invalid.",
+        CTkMessagebox(title="Warning!", message="your input is invalid.",
                         icon="warning", option_1="ok")          
         
     # Re-register validation for dnsp Entry widget
@@ -216,21 +220,40 @@ def on_set():
                     if adapter.Description == adapter_description:
                         # Set the DNS server search order for the specific adapter
                         adapter.SetDNSServerSearchOrder(dns_servers)
-                        CTkMessagebox(message="DNS settings changed for adapter:" + adapter_description ,
+                        dnsp.configure(validate="key", validatecommand=vcmd)
+                        dnss.configure(validate="key", validatecommand=vcmd)
+                        CTkMessagebox(title="Success", message="DNS settings changed for adapter:" + adapter_description ,
                         icon="check", option_1="ok")
                         break
                     else:
-                        CTkMessagebox(message="Adapter '{adapter_description}' not found or not enabled.",
+                        dnsp.configure(validate="key", validatecommand=vcmd)
+                        dnss.configure(validate="key", validatecommand=vcmd)
+                        CTkMessagebox(title="Adapter not found",message="Adapter '{adapter_description}' not found or not enabled.",
                         icon="warning", option_1="ok")
                                 
                 # os.system('netsh interface ipv4 show interfaces')
                 # os.system('netsh interface ip set dns name="'+adapter+'" static '+dns1+'')    
                 # os.system('netsh interface ip add dns name="'+adapter+'"  '+dns2+' index=2')
             else:
-                CTkMessagebox(message="your input is invalid.",
+
+                dnsp.configure(validate="key", validatecommand=vcmd)
+                dnss.configure(validate="key", validatecommand=vcmd)
+                CTkMessagebox(title="Warning!",message="your input is invalid.",
                         icon="warning", option_1="ok")
+                
+
+                
+        else:
+            dnsp.configure(validate="key", validatecommand=vcmd)
+
+            dnss.configure(validate="key", validatecommand=vcmd)
+            CTkMessagebox(title="Warning!", message="your input is invalid.",
+                icon="warning", option_1="ok")
+            
+                
+
     except Exception as e:
-        CTkMessagebox(message=e,
+        CTkMessagebox(title="Warning!",message=e,
                     icon="warning", option_1="ok")
     # Re-register validation for dnsp Entry widget
     dnsp.configure(validate="key", validatecommand=vcmd)
@@ -264,12 +287,23 @@ def on_select(*args):
     
 
 def Only_Integer(S):
+    global BBB
     if S == combobox.get():
         return True
-    if S.isdigit() or (S == '.' ):
+    if S.isdigit() or (S == '.' ) or BBB == 1:
+        BBB = 0
         return True
+        
     return False
+    
 
+def click(key):
+    global BBB
+    
+    BBB = 1
+    
+    
+    
 vcmd = (app.register(Only_Integer), '%S')
 
 frame1= ctk.CTkFrame(app, bg_color="#242424",fg_color="#242424")  
@@ -308,7 +342,7 @@ combobox2 = ctk.CTkComboBox(app,values=adapter_Description,state="readonly",vari
 combobox2.set(adapter_Description[0])
 combobox2.pack(padx=10 , pady=10)
 
-
+dnsp.bind("<BackSpace>", click)
 read_ini()
 
 app.mainloop()
