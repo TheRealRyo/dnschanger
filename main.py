@@ -1,3 +1,4 @@
+
 import tkinter as tk
 import customtkinter as ctk
 import os
@@ -6,7 +7,7 @@ import configparser
 from CTkMessagebox import CTkMessagebox
 import psutil
 import wmi
-import dns.resolver
+
 
 
 
@@ -191,36 +192,43 @@ def on_set():
     try:
         dns1 = dnsptxt.get()
         dns2 = dnsstxt.get()
-        if (len(dns1) >= 7) and (len(dns2) == '' or len(dns2) >= 7):
-            
 
-            adapter= comboselect2.get()
-            c = wmi.WMI()
+        if_match1 = use_regex(dns1)
+        if_match2 = use_regex(dns2)
 
-            # Define the specific adapter description or caption you want to target
-            adapter_description = adapter  # Example: "Local Area Connection"
+        
+        if if_match1:
+            if dns2 == "" or if_match2:
+                
+                    
 
-            # Define the DNS server search order
-            dns_servers = [dns1, dns2]  # Example: Google DNS servers
-
-            # Iterate over network adapters to find the one with the specified description
-            for adapter in c.Win32_NetworkAdapterConfiguration(IPEnabled=True):
-                if adapter.Description == adapter_description:
-                    # Set the DNS server search order for the specific adapter
-                    adapter.SetDNSServerSearchOrder(dns_servers)
-                    CTkMessagebox(message="DNS settings changed for adapter:" + adapter_description ,
-                    icon="check", option_1="ok")
-                    break
+                adapter= comboselect2.get()
+                c = wmi.WMI()
+                # Define the specific adapter description or caption you want to target
+                adapter_description = adapter  # Example: "Local Area Connection"
+                # Define the DNS server search order
+                if not dns2 == "":
+                    dns_servers = [dns1, dns2]  # Example: Google DNS servers
                 else:
-                    CTkMessagebox(message="Adapter '{adapter_description}' not found or not enabled.",
-                    icon="warning", option_1="ok")
-                            
-            # os.system('netsh interface ipv4 show interfaces')
-            # os.system('netsh interface ip set dns name="'+adapter+'" static '+dns1+'')    
-            # os.system('netsh interface ip add dns name="'+adapter+'"  '+dns2+' index=2')
-        else:
-            CTkMessagebox(message="your input is invalid.",
-                    icon="warning", option_1="ok")
+                    dns_servers = [dns1]
+                # Iterate over network adapters to find the one with the specified description
+                for adapter in c.Win32_NetworkAdapterConfiguration(IPEnabled=True):
+                    if adapter.Description == adapter_description:
+                        # Set the DNS server search order for the specific adapter
+                        adapter.SetDNSServerSearchOrder(dns_servers)
+                        CTkMessagebox(message="DNS settings changed for adapter:" + adapter_description ,
+                        icon="check", option_1="ok")
+                        break
+                    else:
+                        CTkMessagebox(message="Adapter '{adapter_description}' not found or not enabled.",
+                        icon="warning", option_1="ok")
+                                
+                # os.system('netsh interface ipv4 show interfaces')
+                # os.system('netsh interface ip set dns name="'+adapter+'" static '+dns1+'')    
+                # os.system('netsh interface ip add dns name="'+adapter+'"  '+dns2+' index=2')
+            else:
+                CTkMessagebox(message="your input is invalid.",
+                        icon="warning", option_1="ok")
     except Exception as e:
         CTkMessagebox(message=e,
                     icon="warning", option_1="ok")
