@@ -26,6 +26,11 @@ app=ctk.CTk()
 
 app.geometry("400x400")
 app.title("version 1.1.0")
+app.maxsize(width=400 , height=400)
+app.eval('tk::PlaceWindow . center')
+app.resizable(0,0)
+app.iconbitmap("AppICO.ico")
+
 
 def use_regex(input_text):
     pattern = r"\b(?:(?:2(?:[0-4][0-9]|5[0-5])|[0-1]?[0-9]?[0-9])\.){3}(?:(?:2([0-4][0-9]|5[0-5])|[0-1]?[0-9]?[0-9]))\b"
