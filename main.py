@@ -4,6 +4,11 @@ import os
 import re
 import configparser
 from CTkMessagebox import CTkMessagebox
+import psutil
+import wmi
+import dns.resolver
+
+
 
 global startupp
 startupp = 0
@@ -75,7 +80,7 @@ def on_save():
     dns1 = dnsptxt.get()
     dns2 = dnsstxt.get()
 
-    if (len(dns1) >= 8) and (len(dns2) == '' or len(dns2) >= 8):
+    if (len(dns1) >= 7) and (len(dns2) == '' or len(dns2) >= 7):
          
 
             config = configparser.ConfigParser()
@@ -131,19 +136,45 @@ def on_delete():
     read_ini()
     dnsptxt.set("")
     dnsstxt.set("")
+    
 
 def on_set():
-    dns1 = dnsptxt.get()
-    dns2 = dnsstxt.get()
-    if (len(dns1) >= 8) and (len(dns2) == '' or len(dns2) >= 8):
-       
-        os.system('netsh interface ipv4 show interfaces')
-        os.system('netsh interface ip set dns name="Ethernet 2" static ' + dns1)    
-        os.system('netsh interface ip add dns name="Ethernet 2"  '+ dns2 +' index=2')
-    else:
-        CTkMessagebox(message="your input is invalid.",
-                  icon="warning", option_1="ok")
+    try:
+        dns1 = dnsptxt.get()
+        dns2 = dnsstxt.get()
+        if (len(dns1) >= 7) and (len(dns2) == '' or len(dns2) >= 7):
+            
 
+            adapter= comboselect2.get()
+            c = wmi.WMI()
+
+            # Define the specific adapter description or caption you want to target
+            adapter_description = adapter  # Example: "Local Area Connection"
+
+            # Define the DNS server search order
+            dns_servers = [dns1, dns2]  # Example: Google DNS servers
+
+            # Iterate over network adapters to find the one with the specified description
+            for adapter in c.Win32_NetworkAdapterConfiguration(IPEnabled=True):
+                if adapter.Description == adapter_description:
+                    # Set the DNS server search order for the specific adapter
+                    adapter.SetDNSServerSearchOrder(dns_servers)
+                    CTkMessagebox(message="DNS settings changed for adapter:" + adapter_description ,
+                    icon="check", option_1="ok")
+                    break
+                else:
+                    CTkMessagebox(message="Adapter '{adapter_description}' not found or not enabled.",
+                    icon="warning", option_1="ok")
+                            
+            # os.system('netsh interface ipv4 show interfaces')
+            # os.system('netsh interface ip set dns name="'+adapter+'" static '+dns1+'')    
+            # os.system('netsh interface ip add dns name="'+adapter+'"  '+dns2+' index=2')
+        else:
+            CTkMessagebox(message="your input is invalid.",
+                    icon="warning", option_1="ok")
+    except Exception as e:
+        CTkMessagebox(message=e,
+                    icon="warning", option_1="ok")
         
     
 def on_select(*args):
@@ -162,9 +193,8 @@ def on_select(*args):
 
 def Only_Integer(S):
     
-    if S in ['0', '1', '2', '3', '4', '5', '6', '7', '8', '9','.']:
-        
-        return True                                                       
+    if S.isdigit() or (S == '.' and '.' not in S):
+        return True
     return False
 
 vcmd = (app.register(Only_Integer), '%S')
@@ -190,10 +220,21 @@ setb.pack( padx = 10 , pady=10)
 vals = []
 comboselect = ctk.StringVar()
 comboselect.trace_add('write', on_select)
-combobox = ctk.CTkComboBox(app,values=vals,state="readonly",variable=comboselect)
+combobox = ctk.CTkComboBox(app,values=vals,state="readonly",variable=comboselect , width=200)
 combobox.pack(padx=10 , pady=10)
 delb = ctk.CTkButton(app, text="delete", command=on_delete , fg_color="#b0092a" , hover_color="#400c16" ) 
 delb.pack( padx = 10 , pady=10)
+addrs = psutil.net_if_addrs()
+adapter_list = list(addrs.keys())
+adapter_Description= []
+comboselect2 = ctk.StringVar()
+c = wmi.WMI()
+for adapter in c.Win32_NetworkAdapterConfiguration(IPEnabled=True):
+    adapter_Description.append(adapter.Description)
+combobox2 = ctk.CTkComboBox(app,values=adapter_Description,state="readonly",variable=comboselect2 , width=300)
+combobox2.set(adapter_Description[0])
+combobox2.pack(padx=10 , pady=10)
+
 
 read_ini()
 
